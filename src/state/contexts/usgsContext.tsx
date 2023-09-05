@@ -1,11 +1,11 @@
 import { createContext } from "react";
-import { CurrentValuesMap, InstantaneousValuesMap } from "wy-water/lib/types";
+import { CurrentValue, CurrentValuesMap, InstantaneousValuesMap } from "wy-water/lib/types";
 
 interface USGSDataState {
   sites: CurrentValuesMap;
   siteDetail: InstantaneousValuesMap; // Consider replacing with the specific type for site details
-  selectedSiteCode: string;
-  setSelectedSiteCode: React.Dispatch<React.SetStateAction<string>>;
+  //selectedSite: CurrentValue | null;
+  //setSelectedSite: React.Dispatch<React.SetStateAction<CurrentValue | null>>;
   setSites: React.Dispatch<React.SetStateAction<CurrentValuesMap>>;
   setSiteDetail: React.Dispatch<React.SetStateAction<any>>; // Update 'any' accordingly
   fetchSiteDetail: (siteCode: string) => void;
@@ -14,8 +14,8 @@ interface USGSDataState {
 const initialState: USGSDataState = {
   sites: {},
   siteDetail: {},
-  selectedSiteCode: "",
-  setSelectedSiteCode: () => {},
+  //selectedSite: null,
+  //setSelectedSite: () => {},
   setSites: () => {},
   setSiteDetail: () => {},
   fetchSiteDetail: () => {},

@@ -1,15 +1,17 @@
 import React, { useContext, useState } from "react";
 import USGSDataContext from "../state/contexts/usgsContext";
 import { useRouter } from "next/navigation";
+import { CurrentValue } from "wy-water/lib/types";
 
 const Homepage: React.FC = () => {
   const router = useRouter();
   const context = useContext(USGSDataContext);
   const [searchTerm, setSearchTerm] = useState(""); // State for search term
 
-  const handleButtonClick = (siteCode: string) => {
-    context.setSelectedSiteCode(siteCode);
-    router.push(`/site/${siteCode}`);
+  const handleButtonClick = (site: CurrentValue) => {
+    //const clonedSite = JSON.parse(JSON.stringify(site));
+    //context.setSelectedSite(clonedSite);
+    router.push(`/site/${site.siteCode}`);
   };
 
   if (!context) {
@@ -55,7 +57,7 @@ const Homepage: React.FC = () => {
           <button
             key={site.siteCode}
             className='bg-blue-500 text-white px-2 py-1 rounded sm:w-1/2 md:w-1/3 lg:w-1/4 m-2'
-            onClick={() => handleButtonClick(site.siteCode)}
+            onClick={() => handleButtonClick(site)}
           >
             {site.siteName}
           </button>

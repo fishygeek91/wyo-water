@@ -2,16 +2,31 @@
 import { useState, useEffect, useContext } from "react";
 import USGSDataContext from "@/state/contexts/usgsContext";
 import { useParams } from "next/navigation";
+import SitePageComponent from "@/components/sitepage";
+
+import { Card, Title, LineChart } from "@tremor/react";
+import { InstantaneousValueMap, Value } from "wy-water/lib/types";
 
 const SitePage: React.FC = () => {
-  const { siteDetail, fetchSiteDetail, selectedSiteCode } = useContext(USGSDataContext);
+  const { sites, siteDetail, fetchSiteDetail } = useContext(USGSDataContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const params = useParams();
-  const siteCode = selectedSiteCode ? selectedSiteCode : (params.siteCode as string);
-  console.log(params);
+  const siteCode: string = params.siteCode as string;
+  const selectedSite = sites[siteCode];
+
+  //   if (!selectedSite?.siteCode) {
+  //     setSelectedSite(sites[siteCode]);
+  //   }
+  //console.log(params);
+
+  let data: Array<{ datetime: string; streamflow: number | null | undefined }> = [];
 
   useEffect(() => {
+    // if (!selectedSite?.siteCode && sites[siteCode]) {
+    //   setSelectedSite(sites[siteCode]);
+    // }
+
     const fetchDetails = async () => {
       try {
         setIsLoading(true);
@@ -23,25 +38,59 @@ const SitePage: React.FC = () => {
       }
     };
 
+    // console.log(siteCode);
+    // console.log(siteDetail);
+    //console.log(siteDetail[selectedSite.siteCode]?.siteName);
+
     if (siteCode && !siteDetail?.[siteCode]) {
       fetchDetails();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [siteCode]);
+  }, [siteCode, siteDetail]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const formatDate = (datetime: string): string => {
+    const dateObj = new Date(datetime);
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
+    return dateObj.toLocaleString("en-US", {
+      month: "numeric",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+  console.log(siteDetail);
+  if (siteDetail?.[siteCode]) {
+    const entries: InstantaneousValueMap = siteDetail[siteCode].instantaneousValues;
+    // create a new list of objects from an InstantaneousValueMap with the following format:[{Datetime: dateTime, "Streamflow": metrics.Streamflow}]
+    data = Object.entries(entries).map(([dateTime, metrics]) => ({
+      datetime: formatDate(dateTime),
+      streamflow: metrics.streamflow?.value,
+    }));
   }
 
   return (
     <div>
-      {/* Here you can render the siteDetail information as needed */}
-      <h1>{siteDetail?.[selectedSiteCode]?.siteName ?? "No details available."}</h1>
-      {/* Add more details as necessary */}
+      <Card>
+        <Title>Streamflow</Title>
+        <LineChart
+          data={data}
+          index='datetime'
+          categories={["streamflow"]}
+          colors={["emerald"]}
+          startEndOnly={true}
+          minValue={50}
+          maxValue={150}
+        />
+      </Card>
+
+      <SitePageComponent
+        selectedSite={selectedSite}
+        siteDetail={siteDetail}
+        siteCode={siteCode}
+        isLoading={isLoading}
+        error={error}
+      />
     </div>
   );
 };
